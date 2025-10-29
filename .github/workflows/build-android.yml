@@ -1,40 +1,49 @@
-name: Build Godot Android APK
+name: Build Godot Game
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
+      # ✅ Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download Godot Headless + Export Templates
+      # ✅ Step 2: Download Godot 4.2.2 editor
+      - name: Download Godot 4.2.2
         run: |
-          wget https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_linux_headless.64.zip -O godot.zip
+          wget https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_linux.x86_64.zip -O godot.zip
           unzip godot.zip -d godot
+          chmod +x godot/Godot_v4.2.2-stable_linux.x86_64
+
+      # ✅ Step 3: Download and install export templates
+      - name: Download export templates
+        run: |
           wget https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_export_templates.tpz -O templates.tpz
           mkdir -p ~/.local/share/godot/export_templates/4.2.2.stable
-          unzip templates.tpz -d ~/.local/share/godot/export_templates/4.2.2.stable
-      - name: Setup Android SDK & JDK
-        uses: android-actions/setup-android@v3
-        with:
-          api-level: 33
-          ndk: 25.2.9519653
-          build-tools: 33.0.2
+          tar -xvf templates.tpz -C ~/.local/share/godot/export_templates/4.2.2.stable || true
 
-      - name: Build Android APK
+      # ✅ Step 4: Set up Android SDK/NDK and Java
+      - name: Set up Java and Android SDK
+        uses: android-actions/setup-android@v3
+
+      # ✅ Step 5: Export Android APK
+      - name: Export Android APK
+        env:
+          GODOT_BIN: ${{ github.workspace }}/godot/Godot_v4.2.2-stable_linux.x86_64
         run: |
           mkdir -p build/android
-          ./godot/Godot_v4.2.2-stable_linux_headless.64 --headless --export-release "Android" build/android/SuperCity.apk
+          $GODOT_BIN --headless --verbose --export-release "Android" build/android/game.apk
 
-      - name: Upload APK
+      # ✅ Step 6: Upload artifact (APK)
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: SuperCity-Android
-          path: build/android/SuperCity.apk
+          path: build/android/game.apk
