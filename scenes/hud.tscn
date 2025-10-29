@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[node name="HUD" type="CanvasLayer"]
+
+[node name="Control" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="JoystickBase" type="TextureRect" parent="Control"]
+texture = ExtResource("res://assets/ui/joystick_base.png")
+position = Vector2(100, 800)
+custom_minimum_size = Vector2(256, 256)
+expand = true
+stretch_mode = 2
+modulate = Color(1, 1, 1, 0.5)
+
+[node name="JoystickKnob" type="TextureRect" parent="Control"]
+texture = ExtResource("res://assets/ui/joystick_knob.png")
+position = Vector2(200, 900)
+custom_minimum_size = Vector2(128, 128)
+expand = true
+stretch_mode = 2
+modulate = Color(1, 1, 1, 0.8)
+
+[node name="JumpButton" type="TextureButton" parent="Control"]
+texture_normal = ExtResource("res://assets/ui/jump_button.png")
+position = Vector2(1600, 850)
+custom_minimum_size = Vector2(192, 192)
+expand_icon = true
+stretch_mode = 2
+
+[connection signal="pressed" from="Control/JumpButton" to="." method="_on_jump_pressed"]
+
+[script]
+resource_path="res://scripts/hud.gd"
