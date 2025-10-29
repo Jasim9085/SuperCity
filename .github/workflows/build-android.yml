@@ -1,0 +1,40 @@
+name: Build Godot Android APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Godot Headless + Export Templates
+        run: |
+          wget https://downloads.tuxfamily.org/godotengine/4.2.2/ Godot_v4.2.2-stable_linux_headless.64.zip -O godot.zip
+          unzip godot.zip -d godot
+          wget https://downloads.tuxfamily.org/godotengine/4.2.2/ Godot_v4.2.2-stable_export_templates.tpz -O templates.tpz
+          unzip templates.tpz -d ~/.local/share/godot/export_templates/4.2.2.stable
+
+      - name: Setup Android SDK & JDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: 33
+          ndk: 25.2.9519653
+          build-tools: 33.0.2
+
+      - name: Build Android APK
+        run: |
+          mkdir -p build/android
+          ./godot/Godot_v4.2.2-stable_linux_headless.64 --headless --export-release "Android" build/android/SuperCity.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SuperCity-Android
+          path: build/android/SuperCity.apk
